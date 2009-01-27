@@ -1,0 +1,11 @@
+Revision history for Term-TermKey-Async
+
+0.02    CHANGES:
+         * Wrap keyname2sym() method.
+
+        BUGFIXES:
+         * Avoid (harmless) warning of uninitialised value when constructor
+           is called with no flags.
+
+0.01    First version, released on an unsuspecting world.
+

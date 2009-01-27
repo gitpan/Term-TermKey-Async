@@ -8,7 +8,7 @@ package Term::TermKey::Async;
 use strict;
 use base qw( IO::Async::Notifier );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp;
 
@@ -134,7 +134,7 @@ sub new
    my $on_key = $args{on_key} || $class->can( "on_key" )
       or croak "Expected 'on_key' or to be a class that can ->on_key";
 
-   my $termkey = Term::TermKey->new( $term, $args{flags} );
+   my $termkey = Term::TermKey->new( $term, $args{flags} || 0 );
    if( !defined $termkey ) {
       croak "Cannot construct a termkey instance\n";
    }
@@ -219,6 +219,8 @@ sub termkey
 
 =head2 $str = $tka->get_keyname( $sym )
 
+=head2 $sym = $tka->keyname2sym( $keyname )
+
 =head2 $str = $tka->format_key( $key, $format )
 
 These methods all proxy to the C<Term::TermKey> object, and allow transparent
@@ -235,6 +237,7 @@ foreach my $method (qw(
    get_waittime
    set_waittime
    get_keyname
+   keyname2sym
    format_key
 )) {
    no strict 'refs';

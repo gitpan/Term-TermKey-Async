@@ -7,7 +7,7 @@ my $build = Module::Build->new
   (
    module_name => 'Term::TermKey::Async',
    requires => {
-                 'Term::TermKey' => 0,
+                 'Term::TermKey' => '0.03',
                },
    build_requires => {
                },

@@ -5,7 +5,7 @@ WriteMakefile
           'NAME' => 'Term::TermKey::Async',
           'VERSION_FROM' => 'lib/Term/TermKey/Async.pm',
           'PREREQ_PM' => {
-                           'Term::TermKey' => 0
+                           'Term::TermKey' => '0.03'
                          },
           'INSTALLDIRS' => 'site',
           'EXE_FILES' => [],
