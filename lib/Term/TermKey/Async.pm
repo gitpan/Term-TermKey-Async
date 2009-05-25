@@ -1,14 +1,15 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2008 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2008,2009 -- leonerd@leonerd.org.uk
 
 package Term::TermKey::Async;
 
 use strict;
-use base qw( IO::Async::Notifier );
+use warnings;
+use base qw( IO::Async::Handle );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Carp;
 
@@ -51,7 +52,7 @@ attempts to provide an abstract way to read keypress events in terminal-based
 programs by providing structures that describe keys, rather than simply
 returning raw bytes as read from the TTY device.
 
-This class is a subclass of C<IO::Async::Notifier>, allowing it to be put in
+This class is a subclass of C<IO::Async::Handle>, allowing it to be put in
 an C<IO::Async::Loop> object and used alongside other objects in an
 C<IO::Async> program.
 
@@ -62,7 +63,7 @@ class.
 
 For implementation reasons, this class is not actually a subclass of
 C<Term::TermKey>. Instead, an object of that class is stored and accessed by
-this object, which is a subclass of C<IO::Async::Notifier>. This distinction
+this object, which is a subclass of C<IO::Async::Handle>. This distinction
 should not normally be noticable. Proxy methods exist for the normal accessors
 of C<Term::TermKey>, and the usual behaviour of the C<getkey()> or other
 methods is instead replaced by the C<on_key> callback or method.
@@ -115,10 +116,6 @@ takes the following named arguments:
 Optional. File handle or POSIX file descriptor number for the file handle to
 use as the connection to the terminal. If not supplied C<STDIN> will be used.
 
-=item on_key => CODE
-
-Callback to invoke when a key is pressed.
-
 =back
 
 =cut
@@ -129,29 +126,58 @@ sub new
    my %args = @_;
 
    # TODO: Find a better algorithm to hunt my terminal
-   my $term = $args{term} || \*STDIN;
+   my $term = delete $args{term} || \*STDIN;
 
-   my $on_key = $args{on_key} || $class->can( "on_key" )
-      or croak "Expected 'on_key' or to be a class that can ->on_key";
-
-   my $termkey = Term::TermKey->new( $term, $args{flags} || 0 );
+   my $termkey = Term::TermKey->new( $term, delete $args{flags} || 0 );
    if( !defined $termkey ) {
       croak "Cannot construct a termkey instance\n";
    }
 
    my $self = $class->SUPER::new(
       read_handle => $term,
+      %args,
    );
 
    $self->{termkey} = $termkey;
    $self->{timerid} = undef;
 
-   $self->{on_key} = $on_key;
-
    return $self;
 }
 
-# For IO::Async::Notifier
+=head1 PARAMETERS
+
+The following named parameters may be passed to C<new> or C<configure>:
+
+=over 8
+
+=item flags => INT
+
+C<libtermkey> flags to pass to constructor or C<set_flags>.
+
+=item on_key => CODE
+
+Callback to invoke when a key is pressed.
+
+=back
+
+=cut
+
+sub configure
+{
+   my $self = shift;
+   my %params = @_;
+
+   if( exists $params{on_key} ) {
+      $self->{on_key} = delete $params{on_key};
+   }
+
+   if( exists $params{flags} ) {
+      $self->termkey->set_flags( delete $params{flags} );
+   }
+
+   $self->SUPER::configure( %params );
+}
+
 sub on_read_ready
 {
    my $self = shift;
@@ -164,7 +190,7 @@ sub on_read_ready
    }
 
    my $termkey = $self->{termkey};
-   my $on_key = $self->{on_key};
+   my $on_key = $self->{on_key} ||= $self->can( 'on_key' );
 
    return unless $termkey->advisereadable == RES_AGAIN;
 

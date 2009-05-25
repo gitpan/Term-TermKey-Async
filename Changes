@@ -1,5 +1,9 @@
 Revision history for Term-TermKey-Async
 
+0.03    CHANGES:
+         * Updated for IO::Async 0.21:
+            IO::Async::Handle; ->configure method
+
 0.02    CHANGES:
          * Wrap keyname2sym() method.
 
