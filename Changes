@@ -1,5 +1,9 @@
 Revision history for Term-TermKey-Async
 
+0.04    CHANGES:
+         * Added a simple example script
+         * Various small updates to keep CPANTS happy
+
 0.03    CHANGES:
          * Updated for IO::Async 0.21:
             IO::Async::Handle; ->configure method

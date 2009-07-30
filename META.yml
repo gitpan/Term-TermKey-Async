@@ -1,9 +1,11 @@
 ---
 name: Term-TermKey-Async
-version: 0.03
+version: 0.04
 author:
-  - 'Paul Evans E<lt>leonerd@leonerd.org.ukE<gt>'
-abstract: 'perl wrapper around C<libtermkey> for C<IO::Async>'
+  - 'Paul Evans <leonerd@leonerd.org.uk>'
+abstract: |-
+  terminal key input using C<libtermkey> with
+  C<IO::Async>
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
@@ -13,7 +15,7 @@ requires:
 provides:
   Term::TermKey::Async:
     file: lib/Term/TermKey/Async.pm
-    version: 0.03
+    version: 0.04
 generated_by: Module::Build version 0.33
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html

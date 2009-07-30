@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Async::Handle );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Carp;
 
@@ -17,7 +17,8 @@ use Term::TermKey qw( RES_EOF RES_KEY RES_AGAIN );
 
 =head1 NAME
 
-C<Term::TermKey::Async> - perl wrapper around C<libtermkey> for C<IO::Async>
+C<Term::TermKey::Async> - terminal key input using C<libtermkey> with
+C<IO::Async>
 
 =head1 SYNOPSIS
 
@@ -280,4 +281,4 @@ __END__
 
 =head1 AUTHOR
 
-Paul Evans E<lt>leonerd@leonerd.org.ukE<gt>
+Paul Evans <leonerd@leonerd.org.uk>
