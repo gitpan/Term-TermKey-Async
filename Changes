@@ -1,5 +1,8 @@
 Revision history for Term-TermKey-Async
 
+0.05    CHANGES:
+         * Updated for Term::TermKey 0.06
+
 0.04    CHANGES:
          * Added a simple example script
          * Various small updates to keep CPANTS happy

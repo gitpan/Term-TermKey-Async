@@ -5,26 +5,26 @@ NAME
 SYNOPSIS
      use Term::TermKey::Async qw( FORMAT_VIM KEYMOD_CTRL );
      use IO::Async::Loop;
-     
- my $loop = IO::Async::Loop->new();
-     
- my $tka = Term::TermKey::Async->new(
+ 
+     my $loop = IO::Async::Loop->new();
+ 
+     my $tka = Term::TermKey::Async->new(
         term => \*STDIN,
 
         on_key => sub {
            my ( $self, $key ) = @_;
-     
-       print "Got key: ".$self->format_key( $key, FORMAT_VIM )."\n";
-     
-       $loop->loop_stop if $key->type_is_unicode and
+ 
+           print "Got key: ".$self->format_key( $key, FORMAT_VIM )."\n";
+ 
+           $loop->loop_stop if $key->type_is_unicode and
                                $key->utf8 eq "C" and
                                $key->modifiers & KEYMOD_CTRL;
         },
      );
-     
- $loop->add( $tka );
-     
- $loop->loop_forever;
+ 
+     $loop->add( $tka );
+ 
+     $loop->loop_forever;
 
 DESCRIPTION
     This object class implements an asynchronous perl wrapper around the
@@ -102,6 +102,7 @@ METHODS
   $tka->set_waittime( $msec )
   $str = $tka->get_keyname( $sym )
   $sym = $tka->keyname2sym( $keyname )
+  ( $ev, $button, $line, $col ) = $tka->interpret_mouse( $key )
   $str = $tka->format_key( $key, $format )
     These methods all proxy to the "Term::TermKey" object, and allow
     transparent use of the "Term::TermKey::Async" object as if it was a

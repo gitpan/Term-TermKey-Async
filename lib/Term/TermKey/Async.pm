@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Async::Handle );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 
@@ -195,7 +195,7 @@ sub on_read_ready
 
    return unless $termkey->advisereadable == RES_AGAIN;
 
-   my $key = Term::TermKey::Key->new();
+   my $key;
 
    my $ret;
    while( ( $ret = $termkey->getkey( $key ) ) == RES_KEY ) {
@@ -248,6 +248,8 @@ sub termkey
 
 =head2 $sym = $tka->keyname2sym( $keyname )
 
+=head2 ( $ev, $button, $line, $col ) = $tka->interpret_mouse( $key )
+
 =head2 $str = $tka->format_key( $key, $format )
 
 These methods all proxy to the C<Term::TermKey> object, and allow transparent
@@ -265,6 +267,7 @@ foreach my $method (qw(
    set_waittime
    get_keyname
    keyname2sym
+   interpret_mouse
    format_key
 )) {
    no strict 'refs';
