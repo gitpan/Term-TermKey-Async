@@ -1,24 +1,24 @@
 ---
-name: Term-TermKey-Async
-version: 0.05
+abstract: "terminal key input using C<libtermkey> with\nC<IO::Async>"
 author:
   - 'Paul Evans <leonerd@leonerd.org.uk>'
-abstract: |-
-  terminal key input using C<libtermkey> with
-  C<IO::Async>
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-requires:
-  IO::Async: 0.21
-  Term::TermKey: 0.06
+build_requires: {}
 configure_requires:
-  Module::Build: 0.35
-provides:
-  Term::TermKey::Async:
-    file: lib/Term/TermKey/Async.pm
-    version: 0.05
-generated_by: Module::Build version 0.35
+  Module::Build: 0.38
+dynamic_config: 1
+generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110930'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
+name: Term-TermKey-Async
+provides:
+  Term::TermKey::Async:
+    file: lib/Term/TermKey/Async.pm
+    version: 0.06
+requires:
+  IO::Async: 0.35
+  Term::TermKey: 0.08
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.06

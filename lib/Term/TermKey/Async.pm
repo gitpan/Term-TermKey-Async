@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2008,2009 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2008-2011 -- leonerd@leonerd.org.uk
 
 package Term::TermKey::Async;
 
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Async::Handle );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Carp;
 
@@ -47,50 +47,32 @@ C<IO::Async>
 
 =head1 DESCRIPTION
 
-This object class implements an asynchronous perl wrapper around the
-C<libtermkey> library for handling terminal keypress events. This library
-attempts to provide an abstract way to read keypress events in terminal-based
-programs by providing structures that describe keys, rather than simply
-returning raw bytes as read from the TTY device.
+This class implements an asynchronous perl wrapper around the C<libtermkey>
+library, which provides an abstract way to read keypress events in
+terminal-based programs. It yields structures that describe keys, rather than
+simply returning raw bytes as read from the TTY device.
 
-This class is a subclass of C<IO::Async::Handle>, allowing it to be put in
-an C<IO::Async::Loop> object and used alongside other objects in an
-C<IO::Async> program.
-
-This object internally uses an instance of L<Term::TermKey> to access the
+This class is a subclass of C<IO::Async::Handle>, allowing it to be put in an
+C<IO::Async::Loop> object and used alongside other objects in an C<IO::Async>
+program. It internally uses an instance of L<Term::TermKey> to access the
 underlying C library. For details on general operation, including the
 representation of keypress events as objects, see the documentation on that
 class.
 
-For implementation reasons, this class is not actually a subclass of
-C<Term::TermKey>. Instead, an object of that class is stored and accessed by
-this object, which is a subclass of C<IO::Async::Handle>. This distinction
-should not normally be noticable. Proxy methods exist for the normal accessors
-of C<Term::TermKey>, and the usual behaviour of the C<getkey()> or other
-methods is instead replaced by the C<on_key> callback or method.
+Proxy methods exist for normal accessors of C<Term::TermKey>, and the usual
+behaviour of the C<getkey> or other methods is instead replaced by the
+C<on_key> event.
 
-This object may be used in one of two ways; with a callback function, or as a
-base class.
+=head1 EVENTS
 
-=head2 Callbacks
+The following events are invoked, either using subclass methods or CODE
+references in parameters:
 
-This object may take a CODE reference to a callback function in its
-constructor:
+=head2 on_key $key
 
- $on_key->( $self, $key )
-
-The C<$key> parameter will contain an instance of C<Term::TermKey::Key>
-representing the keypress event.
-
-=head2 Base Class
-
-Alternatively, a subclass of this class may be built which handles the
-following method:
-
- $self->on_key( $key )
-
-The C<$key> parameter will contain an instance of C<Term::TermKey::Key>
-representing the keypress event.
+Invoked when a key press is received from the terminal. The C<$key> parameter
+will contain an instance of C<Term::TermKey::Key> representing the keypress
+event.
 
 =cut
 
@@ -139,6 +121,9 @@ sub new
       %args,
    );
 
+   $self->can_event( "on_key" ) or
+      croak 'Expected either a on_key callback or an ->on_key method';
+
    $self->{termkey} = $termkey;
    $self->{timerid} = undef;
 
@@ -157,7 +142,7 @@ C<libtermkey> flags to pass to constructor or C<set_flags>.
 
 =item on_key => CODE
 
-Callback to invoke when a key is pressed.
+CODE reference for the C<on_key> event.
 
 =back
 
@@ -191,7 +176,6 @@ sub on_read_ready
    }
 
    my $termkey = $self->{termkey};
-   my $on_key = $self->{on_key} ||= $self->can( 'on_key' );
 
    return unless $termkey->advisereadable == RES_AGAIN;
 
@@ -199,7 +183,7 @@ sub on_read_ready
 
    my $ret;
    while( ( $ret = $termkey->getkey( $key ) ) == RES_KEY ) {
-      $on_key->( $self, $key );
+      $self->invoke_event( on_key => $key );
    }
 
    if( $ret == RES_AGAIN ) {
@@ -207,7 +191,7 @@ sub on_read_ready
          delay => $termkey->get_waittime / 1000,
          code => sub {
             if( $termkey->getkey_force( $key ) == RES_KEY ) {
-               $on_key->( $self, $key );
+               $self->invoke_event( on_key => $key );
             }
             undef $self->{timerid};
          },
@@ -252,6 +236,12 @@ sub termkey
 
 =head2 $str = $tka->format_key( $key, $format )
 
+=head2 $key = $tka->parse_key( $str, $format )
+
+=head2 $key = $tka->parse_key_at_pos( $str, $format )
+
+=head2 $cmp = $tka->keycmp( $key1, $key2 )
+
 These methods all proxy to the C<Term::TermKey> object, and allow transparent
 use of the C<Term::TermKey::Async> object as if it was a subclass.
 Their arguments, behaviour and return value are therefore those provided by
@@ -269,6 +259,9 @@ foreach my $method (qw(
    keyname2sym
    interpret_mouse
    format_key
+   parse_key
+   parse_key_at_pos
+   keycmp
 )) {
    no strict 'refs';
    *{$method} = sub {
@@ -277,11 +270,10 @@ foreach my $method (qw(
    };
 }
 
-# Keep perl happy; keep Britain tidy
-1;
-
-__END__
-
 =head1 AUTHOR
 
 Paul Evans <leonerd@leonerd.org.uk>
+
+=cut
+
+0x55AA;

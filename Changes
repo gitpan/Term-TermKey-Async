@@ -1,5 +1,11 @@
 Revision history for Term-TermKey-Async
 
+0.06    CHANGES:
+         * Updated for Term::TermKey 0.08 / libtermkey 0.7
+         * Added unit test for timeout behaviour
+         * Docs and implementation updates for consistency with other
+           IO::Async code
+
 0.05    CHANGES:
          * Updated for Term::TermKey 0.06
 
