@@ -80,6 +80,8 @@ METHODS
 
   $flags = $tka->get_flags
   $tka->set_flags( $flags )
+  $canonflags = $tka->get_canonflags
+  $tka->set_canonflags( $canonflags )
   $msec = $tka->get_waittime
   $tka->set_waittime( $msec )
   $str = $tka->get_keyname( $sym )

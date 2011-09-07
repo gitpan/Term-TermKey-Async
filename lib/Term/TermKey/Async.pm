@@ -9,10 +9,11 @@ use strict;
 use warnings;
 use base qw( IO::Async::Handle );
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Carp;
 
+use IO::Async::Timer::Countdown;
 use Term::TermKey qw( RES_EOF RES_KEY RES_AGAIN );
 
 =head1 NAME
@@ -125,7 +126,11 @@ sub new
       croak 'Expected either a on_key callback or an ->on_key method';
 
    $self->{termkey} = $termkey;
-   $self->{timerid} = undef;
+
+   $self->add_child( $self->{timer} = IO::Async::Timer::Countdown->new(
+      notifier_name => "force_key",
+      on_expire => $self->_capture_weakself( "_force_key" ),
+   ) );
 
    return $self;
 }
@@ -168,12 +173,8 @@ sub on_read_ready
 {
    my $self = shift;
 
-   my $loop = $self->get_loop;
-
-   if( defined $self->{timerid} ) {
-      $loop->cancel_timer( $self->{timerid} );
-      undef $self->{timerid};
-   }
+   my $timer = $self->{timer};
+   $timer->stop;
 
    my $termkey = $self->{termkey};
 
@@ -187,18 +188,23 @@ sub on_read_ready
    }
 
    if( $ret == RES_AGAIN ) {
-      $self->{timerid} = $loop->enqueue_timer(
-         delay => $termkey->get_waittime / 1000,
-         code => sub {
-            if( $termkey->getkey_force( $key ) == RES_KEY ) {
-               $self->invoke_event( on_key => $key );
-            }
-            undef $self->{timerid};
-         },
-      );
+      $timer->configure( delay => $termkey->get_waittime / 1000 );
+      $timer->start;
    }
    elsif( $ret == RES_EOF ) {
       $self->close;
+   }
+}
+
+sub _force_key
+{
+   my $self = shift;
+
+   my $termkey = $self->{termkey};
+
+   my $key;
+   if( $termkey->getkey_force( $key ) == RES_KEY ) {
+      $self->invoke_event( on_key => $key );
    }
 }
 
@@ -223,6 +229,10 @@ sub termkey
 =head2 $flags = $tka->get_flags
 
 =head2 $tka->set_flags( $flags )
+
+=head2 $canonflags = $tka->get_canonflags
+
+=head2 $tka->set_canonflags( $canonflags )
 
 =head2 $msec = $tka->get_waittime
 
@@ -253,6 +263,8 @@ that class. For more detail, see the L<Term::TermKey> documentation.
 foreach my $method (qw(
    get_flags
    set_flags
+   get_canonflags
+   set_canonflags
    get_waittime
    set_waittime
    get_keyname
