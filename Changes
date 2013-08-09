@@ -1,5 +1,9 @@
 Revision history for Term-TermKey-Async
 
+0.08    CHANGES:
+         * Updated for IO::Async 0.48 - use new watch_time method
+         * Use ->pipepair from IO::Async::OS, not $loop (RT87726)
+
 0.07    CHANGES:
          * Updated for Term::TermKey 0.10 / libtermkey 0.10
          * Use an IO::Async::Timer::Countdown object rather than low-level

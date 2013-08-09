@@ -1,18 +1,20 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 
-use Test::More tests => 15;
+use Test::More;
 use IO::Async::Test;
 
 use IO::Async::Loop;
+use IO::Async::OS;
 
 use Term::TermKey::Async;
 
 my $loop = IO::Async::Loop->new();
 testing_loop( $loop );
 
-my ( $rd, $wr ) = $loop->pipepair or die "Cannot pipe() - $!";
+my ( $rd, $wr ) = IO::Async::OS->pipepair or die "Cannot pipe() - $!";
 
 # Sanitise this just in case
 $ENV{TERM} = "vt100";
@@ -64,3 +66,5 @@ is( $key->sym, $tka->keyname2sym("Up"), '$key->keysym after Up' );
 is( $key->modifiers, 0,                 '$key->modifiers after Up' );
 
 is( $key->format( 0 ), "Up", '$key->format after Up' );
+
+done_testing;

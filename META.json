@@ -1,10 +1,10 @@
 {
-   "abstract" : "terminal key input using C<libtermkey> with\nC<IO::Async>",
+   "abstract" : "terminal key input using C<libtermkey> with",
    "author" : [
       "Paul Evans <leonerd@leonerd.org.uk>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112150",
+   "generated_by" : "Module::Build version 0.4005, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -14,6 +14,12 @@
    },
    "name" : "Term-TermKey-Async",
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "IO::Async::Loop" : "0.48",
+            "Test::More" : "0.88"
+         }
+      },
       "runtime" : {
          "requires" : {
             "IO::Async" : "0.35",
@@ -24,7 +30,7 @@
    "provides" : {
       "Term::TermKey::Async" : {
          "file" : "lib/Term/TermKey/Async.pm",
-         "version" : "0.07"
+         "version" : "0.08"
       }
    },
    "release_status" : "stable",
@@ -33,5 +39,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.07"
+   "version" : "0.08"
 }

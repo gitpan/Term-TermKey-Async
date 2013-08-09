@@ -1,8 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
+use warnings;
 
-use Test::More tests => 7;
+use Test::More;
 
 use Term::TermKey::Async;
 
@@ -31,3 +32,5 @@ is( $key->codepoint, ord("A"), '$key->codepoint' );
 is( $key->modifiers, 0,        '$key->modifiers' );
 
 is( $tka->format_key( $key, 0 ), "A", '->format_key yields "A"' );
+
+done_testing;

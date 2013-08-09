@@ -1,18 +1,20 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 
-use Test::More tests => 5;
+use Test::More;
 use IO::Async::Test;
 
-use IO::Async::Loop;
+use IO::Async::Loop 0.48;
+use IO::Async::OS;
 
 use Term::TermKey::Async;
 
 my $loop = IO::Async::Loop->new();
 testing_loop( $loop );
 
-my ( $rd, $wr ) = $loop->pipepair or die "Cannot pipe() - $!";
+my ( $rd, $wr ) = IO::Async::OS->pipepair or die "Cannot pipe() - $!";
 
 # Sanitise this just in case
 $ENV{TERM} = "vt100";
@@ -31,8 +33,8 @@ ok( !defined $key, '$key is not yet defined' );
 $wr->syswrite( "\e" );
 
 my $wait = 0;
-$loop->enqueue_timer(
-   delay => $tka->get_waittime / 2000,
+$loop->watch_time(
+   after => $tka->get_waittime / 2000,
    code => sub { $wait++ },
 );
 
@@ -45,3 +47,5 @@ wait_for { defined $key };
 ok( $key->type_is_keysym,                   '$key->type_is_keysym after Escape timeout' );
 is( $key->sym, $tka->keyname2sym("Escape"), '$key->keysym after Escape timeout' );
 is( $key->modifiers, 0,                     '$key->modifiers after Escape timeout' );
+
+done_testing;
